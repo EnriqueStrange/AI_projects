@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
 HOUSING_PATH = os.path.join("datasets")
 HOUSING_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
+PROJECT_ROOT_DIR = "."
 
 def fetch_housing_data(housing_url = HOUSING_URL, housing_path=HOUSING_PATH):
     if not os.path.isdir(housing_path):
@@ -60,4 +61,54 @@ housing = load_housing_data()
 housing["income_cat"] = pd.cut(housing["median_income"],
                                 bins=[0, 1.5, 3.0, 4.5, 6. , np.inf],
                                 labels=[1,2,3,4,5])
-housing["income_cat"].hist()
+# housing["income_cat"].hist()
+
+#Stratified sampling
+from sklearn.model_selection import StratifiedShuffleSplit
+
+split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+for train_index, test_index in split.split(housing, housing["income_cat"]):
+    strat_train_set = housing.loc[train_index]
+    strat_test_set = housing.loc[test_index]
+    
+    
+for set_ in (strat_test_set, strat_train_set):
+    set_.drop("income_cat", axis=1, inplace=True)
+    
+    
+housing = strat_train_set.copy()
+
+import matplotlib.image as mpimg
+
+images_path = os.path.join(PROJECT_ROOT_DIR, "images", "end_to_end_project")
+os.makedirs(images_path, exist_ok=True)
+DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
+filename = "california.png"
+print("Downloading", filename)
+url = DOWNLOAD_ROOT + "images/end_to_end_project/" + filename
+urllib.request.urlretrieve(url, os.path.join(images_path, filename))
+
+
+california_img=mpimg.imread(os.path.join(images_path, filename))
+ax = housing.plot(kind="scatter", x="longitude", y="latitude", figsize=(10,7),
+                  s=housing['population']/100, label="Population",
+                  c="median_house_value", cmap=plt.get_cmap("jet"),
+                  colorbar=False, alpha=0.4)
+plt.imshow(california_img, extent=[-124.55, -113.80, 32.45, 42.05], alpha=0.5,
+           cmap=plt.get_cmap("jet"))
+plt.ylabel("Latitude", fontsize=14)
+plt.xlabel("Longitude", fontsize=14)
+
+prices = housing["median_house_value"]
+tick_values = np.linspace(prices.min(), prices.max(), 11)
+cbar = plt.colorbar(ticks=tick_values/prices.max())
+cbar.ax.set_yticklabels(["$%dk"%(round(v/1000)) for v in tick_values], fontsize=14)
+cbar.set_label('Median House Value', fontsize=16)
+
+plt.legend(fontsize=16)
+plt.show()
+
+# housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4, s=housing["population"]/100,
+#               label="population", figsize=(10,7), c="median_house_value", cmap=plt.get_cmap("jet"),
+#               colorbar=True,)
+# plt.legend()
