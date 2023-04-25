@@ -122,15 +122,24 @@ housing = strat_train_set.copy()
 '''droping ocean_proximity as it is type string and can't convert to float'''
 housing.drop("ocean_proximity", axis=1, inplace=True)
 
+"""Experimenting with Attributes to create some usefull attribures for correlaton"""
+housing["rooms_per_household"] = housing["total_rooms"]/housing["households"]
+housing["bedrooms_per_room"] = housing["total_bedrooms"]/housing["total_rooms"]
+housing["population_per_household"] = housing["population"]/housing["households"]
+
+# print(housing.info())
 '''finding corelation using the function by pandas'''
-# corr_matrix = housing.corr()
-# print(corr_matrix["median_house_value"].sort_values(ascending=False))
+corr_matrix = housing.corr()
+print(corr_matrix["median_house_value"].sort_values(ascending=False))
 
 
 '''Another way to check for correlation (pandas' scatter_matrix function)'''
 from pandas.plotting import scatter_matrix
 
-# attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
-# scatter_matrix(housing[attributes], figsize=(12,8))
+attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
+# scatter_matrix(housing[attributes], figsize=(12,8)) 
 
-housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
+"having a closer look to tehe corelation B/W median income and median house value after observing plotted graphs from above"
+# housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
+
+
