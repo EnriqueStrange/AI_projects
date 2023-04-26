@@ -120,21 +120,21 @@ housing = strat_train_set.copy()
 # plt.show()
 
 '''droping ocean_proximity as it is type string and can't convert to float'''
-housing.drop("ocean_proximity", axis=1, inplace=True)
+# housing.drop("ocean_proximity", axis=1, inplace=True)
 
 """Experimenting with Attributes to create some usefull attribures for correlaton"""
-housing["rooms_per_household"] = housing["total_rooms"]/housing["households"]
-housing["bedrooms_per_room"] = housing["total_bedrooms"]/housing["total_rooms"]
-housing["population_per_household"] = housing["population"]/housing["households"]
+# housing["rooms_per_household"] = housing["total_rooms"]/housing["households"]
+# housing["bedrooms_per_room"] = housing["total_bedrooms"]/housing["total_rooms"]
+# housing["population_per_household"] = housing["population"]/housing["households"]
 
 # print(housing.info())
 '''finding corelation using the function by pandas'''
-corr_matrix = housing.corr()
-print(corr_matrix["median_house_value"].sort_values(ascending=False))
+# corr_matrix = housing.corr()
+# print(corr_matrix["median_house_value"].sort_values(ascending=False))
 
 
 '''Another way to check for correlation (pandas' scatter_matrix function)'''
-from pandas.plotting import scatter_matrix
+# from pandas.plotting import scatter_matrix
 
 attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
 # scatter_matrix(housing[attributes], figsize=(12,8)) 
@@ -142,4 +142,36 @@ attributes = ["median_house_value", "median_income", "total_rooms", "housing_med
 "having a closer look to tehe corelation B/W median income and median house value after observing plotted graphs from above"
 # housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
 
+housing_num = strat_train_set.drop("median_house_value",axis=1)
+housing_num.drop("ocean_proximity", axis=1, inplace=True)
+housing_labels = strat_train_set["median_house_value"].copy()
 
+
+"""creating a median to fill n/a values"""
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(strategy="median")
+imputer.fit(housing_num)
+
+# print(imputer.statistics_)
+
+
+# print(housing.median().values)
+
+x = imputer.transform(housing_num)
+'''Training set cleaned and ready'''
+housing_tr = pd.DataFrame(x, columns=housing_num.columns)
+
+
+housing_cat = housing[["ocean_proximity"]]
+# print(housing_cat.head(10))
+
+"""Handling text and categorical attributes"""
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
+ordinal_encoder = OrdinalEncoder()
+housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
+# print(housing_cat_encoded[:10])
+
+cat_encoder = OneHotEncoder()
+housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
+print(housing_cat_1hot.toarray())
