@@ -45,4 +45,4 @@ df = df.set_index('timestamp')
  
 
 # Print the Bitcoin price in USD
-print(df)
+print(df.info())
