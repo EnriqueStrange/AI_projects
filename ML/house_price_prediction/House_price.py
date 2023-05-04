@@ -12,6 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
 HOUSING_PATH = os.path.join("datasets")
@@ -196,5 +198,17 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         else:
             return np.c_[X, rooms_per_household, population_per_household]
         
+        
+
+        
 attr_adder = CombinedAttributesAdder(add_bedroom_per_room=False)
 housing_extra_attribs = attr_adder.transform(housing.values)
+
+
+num_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),
+    ('attribs_adder', CombinedAttributesAdder()),
+    ('std_scaler', StandardScaler()),
+    ])
+
+
